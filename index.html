@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #edit{
+            background-color: aqua;
+            background-image: url("https://png.pngtree.com/thumb_back/fh260/background/20201012/pngtree-white-cloud-on-blue-sky-weather-background-image_410050.jpg");
+            background-image: no-repeat;
+            height: 650px;
+        }
+        h1{
+            text-align: center;
+            padding: 10px;
+        }
+        #main{
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+        }
+        .mapouter{
+            display: flex;
+            justify-content: center;
+        }
+        #searchbar{
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            
+        }
+        #submit{
+            background-color: blueviolet;
+            font-weight: bold;
+            font-size: large;
+            border-radius: 10px;
+            width: 15%;
+            
+        }
+        #gps{
+            background-color: blueviolet;
+            font-weight: bold;
+            font-size: large;
+            border-radius: 10px;
+
+        }
+        #city{
+            width: 20%;
+            height: 40px;
+            border-radius: 10px;
+        }
+        p{
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="edit">
+        <h1>Weather Report</h1>
+    <div id="searchbar">
+        <button id="gps" onclick="getWeather()">Get Your Weather Location</button>
+        <input type="text" id="city" placeholder="Enter Your City">
+        <button onclick="getData()" id="submit">Submit</button>
+
+    </div>
+
+    <div id="main">
+        <div id="container"></div>
+
+    <div class="mapouter">
+        <div class="gmap_canvas">
+            <iframe 
+            width="600" 
+            height="350" 
+            id="gmap_canvas" 
+            frameborder="0" 
+            scrolling="no" 
+            marginheight="0"
+            marginwidth="0"
+            ></iframe>
+        </div>
+    </div>
+
+    </div>
+</div>
+    
+    
+</body>
+</html>
+<script>
+    function getData(){
+    let city = document.getElementById("city").value;   //get the city data
+    //pass the url here
+    const url =`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=5206d03b19ed30615afb684f68ab0d20`;
+
+
+        
+    fetch (url)
+    .then(function(res){
+        return res.json();
+    })
+    .then(function(res){
+        append(res);
+        console.log(res)
+    })
+    .catch(function(err){
+        console.log(err);
+    });
+
+}
+function getDataLocation(lat, lon) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=5881c4a70f1f474bc5289105d70aa1b5`;
+
+    fetch(url)
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (res) {
+      append(res);
+      console.log(res);
+    })
+    .catch(function (err) {
+      console.log(err);
+    });
+}
+
+function append(data){
+        //append inside a container 
+    let container = document.getElementById("container");
+    let map = document.getElementById("gmap_canvas");
+        //isme bug ye hai ki har data ek ke bad ek niche me dega 
+        //isko fix krne ke liye  next line ka code null
+    container.innerHTML = null;
+
+        //jo jo data show krna hai browser me yaha pe create krna hoga
+    let city =document.createElement("p");
+    city.innerText= `City: ${data.name}`;
+        //`` ye use kr ke detailing krna hai browser pe
+        //object literal bolte hai isko
+
+    let min = document.createElement("p");
+    min.innerText= `Min Temp: ${Math.ceil(data.main.temp_min-273)} °C`;
+
+    let max = document.createElement("p");
+    max.innerText= `Max Temp: ${Math.ceil(data.main.temp_max-273)} °C`;
+
+    let winds = document.createElement("p");
+    winds.innerText= `Wind: ${data.wind.speed} meter/sec`;
+
+    let cloud = document.createElement("p");
+    cloud.innerText= `Clouds: ${data.clouds.all} %`;
+
+    let sunrise = document.createElement("p");
+    sunrise.innerText= `Sunrise: ${new Date(data.sys.sunrise*1000)}`;
+    
+    let sunset = document.createElement("p");
+    sunset.innerText= `Sunset: ${new Date(data.sys.sunset*1000)}`;
+
+
+
+    let current = document.createElement("p");
+    current.innerText= `Current Temp: ${Math.ceil(data.main.temp-273)} °C`;
+
+    let humidity =document.createElement("p");
+    humidity.innerText= `Humidity: ${data.main.humidity} %`;
+
+    container.append(city,min,max,current,winds,cloud,sunrise,sunset,humidity);
+
+    map.src =`https://maps.google.com/maps?q=${data.name}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+
+}
+function getWeather(){
+navigator.geolocation.getCurrentPosition(success);
+
+    function success(position) {
+    let crd = position.coords;
+
+    console.log("Your current position is:");
+    console.log(`Latitude : ${crd.latitude}`);
+    console.log(`Longitude: ${crd.longitude}`);
+    console.log(`More or less ${crd.accuracy} meters.`);
+
+    getDataLocation(crd.latitude, crd.longitude);
+  }
+}
+
+</script>
